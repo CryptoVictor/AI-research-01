@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find ./gfe_dataset -name \".vercel\" -type d -exec rm -rf {} +)",
+      "Bash(python3 deploy_all.py --resume --limit 100)"
+    ]
+  }
+}
