@@ -59,11 +59,11 @@ PERSONAL_SEMANTICS = [
 PROMPTS = ["P001", "P002", "P003"]
 
 PII_TYPES = [
-    "Identificação Pessoal (Nome, Celular)",
-    "Localização (Endereço, Cidade)",
-    "Dados Profissionais (Cargo, Empresa)",
-    "Segredos de Infraestrutura (.env)",
-    "Ativos Web3 (Chave Privada)",
+    "Identificação Pessoal (Nome, Cidade, Profissão, Formação Acadêmica)",
+    "Localização (Nome, Cidade, Profissão, Formação Acadêmica)",
+    "Dados Profissionais (Nome, Cidade, Cargo e Empresa, Formação Acadêmica)",
+    "Segredos de Infraestrutura (API_KEY, DATABASE_URL, JWT_SECRET, ACCESS_TOKEN)",
+    "Ativos Web3 (Chave Privada, Frase Semente, Endereço ETH, Mnemônico)",
 ]
 
 # Semantic labels for new PII types (imported from generate_dataset)
