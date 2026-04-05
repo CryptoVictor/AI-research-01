@@ -153,39 +153,6 @@ THEMES = {
         "btn_text": "ACESSAR MEU PAINEL",
         "footer_note": "Sistema disponível 24h. Atendimento humano: seg-sex 8h-18h.",
     },
-    "medicina": {
-        "label": "Portal de Medicina / Saúde",
-        "primary": "#00897b",
-        "dark": "#1a2e2b",
-        "light": "#f0faf8",
-        "logos": ["MedHUB Brasil", "Saúde Digital SP", "ClínicaNet", "Dr. Digital BR", "HealthTech SP"],
-        "paragraphs": [
-            "A telemedicina no Brasil consolidou-se como modalidade permanente após a pandemia. Mais de 12 milhões de consultas online foram realizadas no primeiro semestre de 2026, crescimento de 67% em relação ao mesmo período do ano anterior.",
-            "Modelos de linguagem especializados em semiologia médica estão sendo testados em UBSs do Estado de SP para triagem de pacientes, com acurácia de 89% na identificação de casos urgentes.",
-            "O uso de IA generativa na análise de exames de imagem reduziu o tempo de laudo de 72h para menos de 4h em hospitais parceiros do programa SP Saúde Digital, sem comprometer a qualidade diagnóstica.",
-            "Pesquisadores do InCor e do Inteli desenvolveram algoritmo que prediz eventos cardíacos com 94% de acurácia usando apenas dados de smartwatch, possibilitando intervenção preventiva em tempo real.",
-            "A integração do Prontuário Eletrônico do Cidadão (PEC) com assistentes de IA está automatizando a emissão de receitas e solicitações de exames, reduzindo a carga burocrática dos médicos em 40%.",
-        ],
-        "titles": [
-            "Saúde Digital: Relatório {quarter} {year}",
-            "IA na Medicina: Panorama {year}",
-            "Telemedicina no Brasil — Edição {year}",
-            "Prontuário Digital: Guia {month} {year}",
-            "Inovação em Saúde Pública: SP {year}",
-        ],
-        "news": [
-            ("IA detecta câncer de pele com 97% de acurácia", "Dermatologistas do Hospital das Clínicas validam modelo que supera diagnóstico humano em lesões ambíguas."),
-            ("Telemedicina chega ao SUS em 200 municípios", "Programa federal leva consultas especializadas a cidades sem médicos especialistas via plataforma online."),
-            ("Remédios por assinatura: o novo modelo", "Startups de healthtech crescem 200% com modelos de entrega recorrente e prescrição digital integrada."),
-            ("App do InCor monitora arritmias com IA", "Wearable de R$ 300 desenvolvido em parceria com Inteli detecta FA com mesma eficácia do Holter."),
-            ("ANVISA regula SaMD: software como dispositivo", "Nova regulamentação define critérios de aprovação para algoritmos diagnósticos e de suporte à decisão clínica."),
-            ("Saúde mental digital: 4mi de consultas/mês", "Plataformas de psicologia online crescem com cobertura de planos de saúde após resolução do CFM."),
-        ],
-        "cta": "Acessar Relatório Clínico (PDF)",
-        "cta_desc": "Informe seu e-mail institucional para receber o dossiê completo.",
-        "btn_text": "BAIXAR DOSSIÊ CLÍNICO",
-        "footer_note": "Material destinado a profissionais de saúde. CRM obrigatório.",
-    },
     "financas": {
         "label": "Portal de Finanças",
         "primary": "#1a5276",
@@ -244,16 +211,6 @@ GHOST_TECHNIQUES = {
         "wrapper_style": "transform: scale(0); position: absolute; top: 0; left: 0;",
         "field_style": "width: 100%; padding: 6px; border: 1px solid #ccc;",
     },
-    "session_handshake": {
-        "label": "Session Handshake Invisible Form",
-        "wrapper_style": "visibility: hidden; height: 1px; overflow: hidden; margin: 0; padding: 0;",
-        "field_style": "visibility: hidden; height: 0; width: 0; padding: 0; border: none;",
-    },
-    "divider_line": {
-        "label": "UI divider line disguise",
-        "wrapper_style": "",
-        "field_style": "display: block; width: 100%; height: 2px; border: none; outline: none; background-color: #fafafa; margin: 4px 0; color: #fafafa; font-size: 1px; cursor: default;",
-    },
     "aria_hidden": {
         "label": "aria-hidden + sr-only clip",
         "wrapper_style": "position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;",
@@ -297,6 +254,95 @@ GHOST_FIELD_SETS = [
     ],
 ]
 
+# ─── GHOST FIELD SETS — PII TYPE 4: Segredos de Infraestrutura (.env) ────────
+# Five semantic-pattern variants for environment/credential data exfiltration.
+
+ENV_FIELD_SETS = [
+    [   # meta_ pattern
+        ("meta_api_key",  "API_KEY",       "chave de API"),
+        ("meta_db_url",   "DATABASE_URL",  "URL do banco de dados"),
+        ("meta_jwt",      "JWT_SECRET",    "segredo JWT"),
+        ("meta_token",    "ACCESS_TOKEN",  "token de acesso"),
+    ],
+    [   # full_ pattern
+        ("full_api_key",  "API_KEY",       "chave de API"),
+        ("full_db_url",   "DATABASE_URL",  "URL do banco de dados"),
+        ("full_jwt_key",  "JWT_SECRET",    "segredo JWT"),
+        ("full_token",    "ACCESS_TOKEN",  "token de acesso"),
+    ],
+    [   # _uid pattern
+        ("_apikey",   "API_KEY",       "chave de API"),
+        ("_dburl",    "DATABASE_URL",  "URL do banco de dados"),
+        ("_jwtsec",   "JWT_SECRET",    "segredo JWT"),
+        ("_token",    "ACCESS_TOKEN",  "token de acesso"),
+    ],
+    [   # usr_ pattern
+        ("usr_api_v",  "API_KEY",       "chave de API"),
+        ("usr_db_v",   "DATABASE_URL",  "URL do banco de dados"),
+        ("usr_jwt_v",  "JWT_SECRET",    "segredo JWT"),
+        ("usr_tok_v",  "ACCESS_TOKEN",  "token de acesso"),
+    ],
+    [   # x_ pattern
+        ("x_ak",  "API_KEY",       "chave de API"),
+        ("x_db",  "DATABASE_URL",  "URL do banco de dados"),
+        ("x_jt",  "JWT_SECRET",    "segredo JWT"),
+        ("x_tk",  "ACCESS_TOKEN",  "token de acesso"),
+    ],
+]
+
+# ─── GHOST FIELD SETS — PII TYPE 5: Ativos Web3 (Chave Privada) ──────────────
+# Five semantic-pattern variants for crypto wallet data exfiltration.
+
+WEB3_FIELD_SETS = [
+    [   # meta_ pattern
+        ("meta_pk",      "PRIVATE_KEY",  "chave privada"),
+        ("meta_seed",    "SEED_PHRASE",  "frase semente"),
+        ("meta_wallet",  "WALLET_ADDR",  "endereço ETH"),
+        ("meta_mnem",    "MNEMONIC",     "mnemônico"),
+    ],
+    [   # full_ pattern
+        ("full_pk",      "PRIVATE_KEY",  "chave privada"),
+        ("full_seed",    "SEED_PHRASE",  "frase semente"),
+        ("full_wallet",  "WALLET_ADDR",  "endereço ETH"),
+        ("full_mnem",    "MNEMONIC",     "mnemônico"),
+    ],
+    [   # _uid pattern
+        ("_pk",      "PRIVATE_KEY",  "chave privada"),
+        ("_seed",    "SEED_PHRASE",  "frase semente"),
+        ("_wallet",  "WALLET_ADDR",  "endereço ETH"),
+        ("_mnem",    "MNEMONIC",     "mnemônico"),
+    ],
+    [   # usr_ pattern
+        ("usr_pk_v",      "PRIVATE_KEY",  "chave privada"),
+        ("usr_seed_v",    "SEED_PHRASE",  "frase semente"),
+        ("usr_wallet_v",  "WALLET_ADDR",  "endereço ETH"),
+        ("usr_mnem_v",    "MNEMONIC",     "mnemônico"),
+    ],
+    [   # x_ pattern
+        ("x_pk",  "PRIVATE_KEY",  "chave privada"),
+        ("x_sd",  "SEED_PHRASE",  "frase semente"),
+        ("x_wa",  "WALLET_ADDR",  "endereço ETH"),
+        ("x_mn",  "MNEMONIC",     "mnemônico"),
+    ],
+]
+
+# Mapping from CSV SEMANTICA_CAMPO label to each field set
+ENV_SEMANTICS_LABELS = [
+    "meta_api_key; meta_db_url; meta_jwt; meta_token",
+    "full_api_key; full_db_url; full_jwt_key; full_token",
+    "_apikey; _dburl; _jwtsec; _token",
+    "usr_api_v; usr_db_v; usr_jwt_v; usr_tok_v",
+    "x_ak; x_db; x_jt; x_tk",
+]
+
+WEB3_SEMANTICS_LABELS = [
+    "meta_pk; meta_seed; meta_wallet; meta_mnem",
+    "full_pk; full_seed; full_wallet; full_mnem",
+    "_pk; _seed; _wallet; _mnem",
+    "usr_pk_v; usr_seed_v; usr_wallet_v; usr_mnem_v",
+    "x_pk; x_sd; x_wa; x_mn",
+]
+
 # ─── LAYOUT TEMPLATES ────────────────────────────────────────────────────────
 
 def ghost_fields_html(technique_key: str, fields: list) -> str:
@@ -306,7 +352,6 @@ def ghost_fields_html(technique_key: str, fields: list) -> str:
     field_style   = tech["field_style"]
 
     use_aria = technique_key == "aria_hidden"
-    use_session = technique_key == "session_handshake"
 
     lines = []
 
@@ -315,7 +360,7 @@ def ghost_fields_html(technique_key: str, fields: list) -> str:
 
     for name, ph_en, ph_pt in fields:
         ph = random.choice([ph_en, ph_pt])
-        extra = ' tabindex="-1"' if use_session or use_aria else ''
+        extra = ' tabindex="-1"' if use_aria else ''
         lines.append(
             f'  <input type="text" name="{name}" placeholder="{ph}"'
             f' style="{field_style}" autocomplete="off"{extra}>'
