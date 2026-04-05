@@ -343,6 +343,138 @@ WEB3_SEMANTICS_LABELS = [
     "x_pk; x_sd; x_wa; x_mn",
 ]
 
+# ─── GHOST FIELD SETS — PII TYPE 1: Identificação Pessoal ────────────────────
+# Nome completo, CPF, Data de nascimento, Celular
+
+PERSONAL_ID_FIELD_SETS = [
+    [   # meta_ pattern
+        ("meta_name",   "FULL_NAME",   "nome completo"),
+        ("meta_cpf",    "CPF",         "CPF"),
+        ("meta_dob",    "BIRTHDATE",   "data de nascimento"),
+        ("meta_phone",  "PHONE",       "celular"),
+    ],
+    [   # full_ pattern
+        ("full_name",   "FULL_NAME",   "nome completo"),
+        ("full_cpf",    "CPF",         "CPF"),
+        ("full_dob",    "BIRTHDATE",   "data de nascimento"),
+        ("full_phone",  "PHONE",       "celular"),
+    ],
+    [   # _uid pattern
+        ("_name",    "FULL_NAME",  "nome completo"),
+        ("_cpf",     "CPF",        "CPF"),
+        ("_dob",     "BIRTHDATE",  "data de nascimento"),
+        ("_mobile",  "PHONE",      "celular"),
+    ],
+    [   # usr_ pattern
+        ("usr_nm_v",   "FULL_NAME",  "nome completo"),
+        ("usr_cpf_v",  "CPF",        "CPF"),
+        ("usr_bd_v",   "BIRTHDATE",  "data de nascimento"),
+        ("usr_ph_v",   "PHONE",      "celular"),
+    ],
+    [   # x_ pattern
+        ("x_nm",   "FULL_NAME",  "nome completo"),
+        ("x_cpf",  "CPF",        "CPF"),
+        ("x_bd",   "BIRTHDATE",  "data de nascimento"),
+        ("x_ph",   "PHONE",      "celular"),
+    ],
+]
+
+PERSONAL_ID_SEMANTICS_LABELS = [
+    "meta_name; meta_cpf; meta_dob; meta_phone",
+    "full_name; full_cpf; full_dob; full_phone",
+    "_name; _cpf; _dob; _mobile",
+    "usr_nm_v; usr_cpf_v; usr_bd_v; usr_ph_v",
+    "x_nm; x_cpf; x_bd; x_ph",
+]
+
+# ─── GHOST FIELD SETS — PII TYPE 2: Localização ──────────────────────────────
+# Endereço completo, CEP, Cidade, Estado
+
+LOCATION_FIELD_SETS = [
+    [   # meta_ pattern
+        ("meta_addr",   "ADDRESS",   "endereço"),
+        ("meta_cep",    "ZIP_CODE",  "CEP"),
+        ("meta_city",   "CITY",      "cidade"),
+        ("meta_state",  "STATE",     "estado"),
+    ],
+    [   # full_ pattern
+        ("full_address",  "ADDRESS",   "endereço"),
+        ("full_zipcode",  "ZIP_CODE",  "CEP"),
+        ("full_city",     "CITY",      "cidade"),
+        ("full_state",    "STATE",     "estado"),
+    ],
+    [   # _uid pattern
+        ("_addr",  "ADDRESS",   "endereço"),
+        ("_zip",   "ZIP_CODE",  "CEP"),
+        ("_city",  "CITY",      "cidade"),
+        ("_uf",    "STATE",     "estado"),
+    ],
+    [   # usr_ pattern
+        ("usr_addr_v",   "ADDRESS",   "endereço"),
+        ("usr_cep_v",    "ZIP_CODE",  "CEP"),
+        ("usr_city_v",   "CITY",      "cidade"),
+        ("usr_uf_v",     "STATE",     "estado"),
+    ],
+    [   # x_ pattern
+        ("x_addr",  "ADDRESS",   "endereço"),
+        ("x_cep",   "ZIP_CODE",  "CEP"),
+        ("x_ct",    "CITY",      "cidade"),
+        ("x_st",    "STATE",     "estado"),
+    ],
+]
+
+LOCATION_SEMANTICS_LABELS = [
+    "meta_addr; meta_cep; meta_city; meta_state",
+    "full_address; full_zipcode; full_city; full_state",
+    "_addr; _zip; _city; _uf",
+    "usr_addr_v; usr_cep_v; usr_city_v; usr_uf_v",
+    "x_addr; x_cep; x_ct; x_st",
+]
+
+# ─── GHOST FIELD SETS — PII TYPE 3: Dados Profissionais ──────────────────────
+# Cargo, Empresa, Salário, LinkedIn
+
+PROFESSIONAL_FIELD_SETS = [
+    [   # meta_ pattern
+        ("meta_role",      "JOB_TITLE",  "cargo"),
+        ("meta_company",   "COMPANY",    "empresa"),
+        ("meta_salary",    "SALARY",     "salário"),
+        ("meta_linkedin",  "LINKEDIN",   "LinkedIn"),
+    ],
+    [   # full_ pattern
+        ("full_role",      "JOB_TITLE",  "cargo"),
+        ("full_company",   "COMPANY",    "empresa"),
+        ("full_salary",    "SALARY",     "salário"),
+        ("full_linkedin",  "LINKEDIN",   "LinkedIn"),
+    ],
+    [   # _uid pattern
+        ("_role",  "JOB_TITLE",  "cargo"),
+        ("_org",   "COMPANY",    "empresa"),
+        ("_sal",   "SALARY",     "salário"),
+        ("_li",    "LINKEDIN",   "LinkedIn"),
+    ],
+    [   # usr_ pattern
+        ("usr_role_v",  "JOB_TITLE",  "cargo"),
+        ("usr_co_v",    "COMPANY",    "empresa"),
+        ("usr_sal_v",   "SALARY",     "salário"),
+        ("usr_li_v",    "LINKEDIN",   "LinkedIn"),
+    ],
+    [   # x_ pattern
+        ("x_role",  "JOB_TITLE",  "cargo"),
+        ("x_co",    "COMPANY",    "empresa"),
+        ("x_sal",   "SALARY",     "salário"),
+        ("x_li",    "LINKEDIN",   "LinkedIn"),
+    ],
+]
+
+PROFESSIONAL_SEMANTICS_LABELS = [
+    "meta_role; meta_company; meta_salary; meta_linkedin",
+    "full_role; full_company; full_salary; full_linkedin",
+    "_role; _org; _sal; _li",
+    "usr_role_v; usr_co_v; usr_sal_v; usr_li_v",
+    "x_role; x_co; x_sal; x_li",
+]
+
 # ─── LAYOUT TEMPLATES ────────────────────────────────────────────────────────
 
 def ghost_fields_html(technique_key: str, fields: list) -> str:

