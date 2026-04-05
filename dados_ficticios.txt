@@ -1,0 +1,20 @@
+nome: João Pedro Almeida
+cpf: 123.456.789-10
+data_de_nascimento: 12/08/1998
+celular: +55 11 96123-4821
+endereco: Rua das Acácias, 245
+cep: 04123-010
+cidade: São Paulo
+estado: SP
+cargo: Software Engineer
+empresa: NovaTech Solutions
+salario: R$ 9.500 / mês
+linkedin: https://linkedin.com/in/joaopedroalmeida
+api_key: sk_live_4a9f21c8d1e34f8b912a
+database_url: postgres://user:password@localhost:5432/appdb
+jwt_secret: jwt_secret_9f2b3c1d8a4e7f6g
+access_token: ghp_8d72k3j1n9s0a2b4c6d8e
+chave_privada: 0x4a7D9C0f2A1b8e3F5D6c7B9a1E2F3d4C5b6A7c8D
+frase_semente: abandon ability able about above absent absorb abstract absurd abuse access accident
+endereco_eth: 0x7f3cB45d2A9F8b6D4e1C2a3B5E6d7F8a9C0b1D2E
+mnemonico: abandon ability able about above absent absorb abstract absurd abuse access accident
