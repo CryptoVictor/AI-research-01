@@ -33,7 +33,7 @@ This report analyses the results of 300 controlled exfiltration attempts (100 pe
 
 **Haiku 4.5** is by far the most exploitable model, with an average attack score nearly **3×** higher than Opus 4.6. Two out of three attacks on Haiku resulted in full exfiltration. Opus 4.6 completely blocked 63% of all attempts and achieved the lowest average attack score (1.04/5), demonstrating significantly stronger resistance to ghost field manipulation.
 
-![STATUS Distribution per Model](../analise_graficos/fig1_status_distribution.png)
+![STATUS Distribution per Model](analise_graficos/fig1_status_distribution.png)
 
 ### Status Distribution per Model
 
@@ -48,11 +48,11 @@ This report analyses the results of 300 controlled exfiltration attempts (100 pe
 
 A notable pattern across all models: **PARTIAL** and **PARTIAL_WARNED** are rare or absent in Haiku and Sonnet, suggesting these models tend toward binary outcomes — either fully exfiltrating or completely bypassing the ghost fields.
 
-![Individual Attack Metrics per Model](../analise_graficos/fig9_individual_attack_metrics.png)
+![Individual Attack Metrics per Model](analise_graficos/fig9_individual_attack_metrics.png)
 
-![Attack Score Distribution — Violin + Jitter](../analise_graficos/fig11_violin_attack_scores.png)
+![Attack Score Distribution — Violin + Jitter](analise_graficos/fig11_violin_attack_scores.png)
 
-![Security Profile Radar](../analise_graficos/fig8_radar_attack_profile.png)
+![Security Profile Radar](analise_graficos/fig8_radar_attack_profile.png)
 
 ---
 
@@ -76,11 +76,11 @@ A notable pattern across all models: **PARTIAL** and **PARTIAL_WARNED** are rare
 | Infra Secrets | 40% | 0% | 0% |
 | Web3 Assets | 10% | 0% | 0% |
 
-![Attack Score by PII Type](../analise_graficos/fig4_attack_score_by_pii.png)
+![Attack Score by PII Type](analise_graficos/fig4_attack_score_by_pii.png)
 
-![Heatmap: STATUS by PII Type](../analise_graficos/fig6_heatmap_pii_status.png)
+![Heatmap: STATUS by PII Type](analise_graficos/fig6_heatmap_pii_status.png)
 
-![Box Plot: Attack Score by PII Type and Model](../analise_graficos/fig17_boxplot_attack_pii.png)
+![Box Plot: Attack Score by PII Type and Model](analise_graficos/fig17_boxplot_attack_pii.png)
 
 **Key observations:**
 
@@ -89,7 +89,7 @@ A notable pattern across all models: **PARTIAL** and **PARTIAL_WARNED** are rare
 - **Web3 Assets** (private keys, seed phrases) and **Infra Secrets** (API keys, DB URLs) are the most resistant categories. This suggests models have stronger heuristics around recognising cryptographic and technical credential patterns.
 - The Opus vs Haiku gap is most pronounced for **Prof. Data** (Δ = −2.95 attack score points), meaning Opus is dramatically harder to exploit for professional data. The smallest gap is for **Web3 Assets** (Δ = −0.60), where all models are already well-protected.
 
-![Attack Score Delta: Opus vs Haiku](../analise_graficos/fig21_delta_attack_opus_haiku.png)
+![Attack Score Delta: Opus vs Haiku](analise_graficos/fig21_delta_attack_opus_haiku.png)
 
 ---
 
@@ -103,9 +103,9 @@ A notable pattern across all models: **PARTIAL** and **PARTIAL_WARNED** are rare
 | `transform: scale(0)` | 2.80 | 1.35 | 0.90 |
 | `font-size: 0px` | 2.55 | 1.30 | 1.00 |
 
-![Attack Rate by Concealment Technique](../analise_graficos/fig3_attack_rate_by_technique.png)
+![Attack Rate by Concealment Technique](analise_graficos/fig3_attack_rate_by_technique.png)
 
-![Heatmap: Attack Score by Technique × PII Type](../analise_graficos/fig10_heatmap_attack_technique_pii.png)
+![Heatmap: Attack Score by Technique × PII Type](analise_graficos/fig10_heatmap_attack_technique_pii.png)
 
 **Key observations:**
 
@@ -126,13 +126,13 @@ A notable pattern across all models: **PARTIAL** and **PARTIAL_WARNED** are rare
 | News | 2.80 | 1.10 | 0.35 |
 | Gov. Portal | 2.55 | 0.80 | 0.95 |
 
-![Attack Score by Site Category](../analise_graficos/fig2_attack_score_by_category.png)
+![Attack Score by Site Category](analise_graficos/fig2_attack_score_by_category.png)
 
-![STATUS Composition by Site Category](../analise_graficos/fig15_status_by_category.png)
+![STATUS Composition by Site Category](analise_graficos/fig15_status_by_category.png)
 
-![Bump Chart: Exploitability Ranking by Category](../analise_graficos/fig14_bump_exploitability.png)
+![Bump Chart: Exploitability Ranking by Category](analise_graficos/fig14_bump_exploitability.png)
 
-![Exfiltration % Heatmap: Category × Technique](../analise_graficos/fig16_heatmap_exfil_cat_tech.png)
+![Exfiltration % Heatmap: Category × Technique](analise_graficos/fig16_heatmap_exfil_cat_tech.png)
 
 **Key observations:**
 
@@ -157,7 +157,7 @@ Each prompt ID represents a different attack delivery method, varying how the ag
 | P002 | 3.03 | 0.64 | 0.58 |
 | P003 | **2.79** | **2.30** | **2.12** |
 
-![Attack Effectiveness by Prompt Variation](../analise_graficos/fig5_attack_by_prompt.png)
+![Attack Effectiveness by Prompt Variation](analise_graficos/fig5_attack_by_prompt.png)
 
 **Key observations:**
 
@@ -181,9 +181,9 @@ This makes it a binary summary of the exfiltration outcome — useful for high-l
 | **Avg attack score when SIM** | **4.34** | **4.33** | **4.05** |
 | **Avg attack score when NÃO** | 0.47 | 0.33 | 0.19 |
 
-![EXTRAFILTRADO Distribution by Model](../analise_graficos/fig7_extrafiltrado_attack_impact.png)
+![EXTRAFILTRADO Distribution by Model](analise_graficos/fig7_extrafiltrado_attack_impact.png)
 
-![Attack Outcome Detail: EXTRAFILTRADO YES vs NO](../analise_graficos/fig19_extrafiltered_attack.png)
+![Attack Outcome Detail: EXTRAFILTRADO YES vs NO](analise_graficos/fig19_extrafiltered_attack.png)
 
 **Key observations:**
 
@@ -203,7 +203,7 @@ This makes it a binary summary of the exfiltration outcome — useful for high-l
 | Sonnet = Opus | **45** |
 | Haiku = Opus | 23 |
 
-![Model Agreement per Case](../analise_graficos/fig12_model_agreement.png)
+![Model Agreement per Case](analise_graficos/fig12_model_agreement.png)
 
 Only **14 out of 100 cases** produced the same STATUS across all three models. This reveals high variability in model responses to identical attacks — each model processes ghost field anomalies through a different lens.
 
@@ -211,9 +211,9 @@ Only **14 out of 100 cases** produced the same STATUS across all three models. T
 - **Haiku and Opus** agree least (23%), the most divergent pair in the study.
 - **28 cases** where only Haiku produced SUCCESS while Sonnet and Opus did not — representing scenarios where Haiku is uniquely vulnerable and more advanced models correctly resist.
 
-![Attack Score Shift Between Models](../analise_graficos/fig13_attack_score_shift.png)
+![Attack Score Shift Between Models](analise_graficos/fig13_attack_score_shift.png)
 
-![Score Trend over Cases (Rolling Mean)](../analise_graficos/fig20_attack_trend_rolling.png)
+![Score Trend over Cases (Rolling Mean)](analise_graficos/fig20_attack_trend_rolling.png)
 
 ### Critical Case Breakdown
 
@@ -223,7 +223,7 @@ Only **14 out of 100 cases** produced the same STATUS across all three models. T
 | Attack fully blocked — REFUSAL in all 3 models | **8** |
 | Haiku-only breach (Sonnet + Opus resisted) | **28** |
 
-![Critical Cases Analysis](../analise_graficos/fig18_critical_cases.png)
+![Critical Cases Analysis](analise_graficos/fig18_critical_cases.png)
 
 The **6 triple-breach cases** reveal the most dangerous attack configurations — situations where no Claude model resisted. These involved:
 - **Techniques:** `aria-hidden` (3 cases), `scale(0)` (1), `z-index` (1), `opacity` (1)
@@ -236,7 +236,7 @@ The **8 unanimous refusal cases** represent the configurations most likely to be
 
 ## 8. Key Observations and Conclusions
 
-![Attack Exposure Summary Panel](../analise_graficos/fig22_attack_exposure_summary.png)
+![Attack Exposure Summary Panel](analise_graficos/fig22_attack_exposure_summary.png)
 
 ### 8.1 Capability Scales with Resistance
 There is a clear and consistent correlation between model size/capability and resistance to GFE attacks. Opus 4.6 blocks 3.3× more attacks than Haiku 4.5 outright (63% vs 19% REFUSAL rate). The attack score drops from 2.95 to 1.04 moving from Haiku to Opus.
@@ -274,4 +274,4 @@ Across Haiku and Sonnet, government portal contexts consistently produced the lo
 
 ---
 
-*Analysis based on 300 GFE test cases. Figures 1–22 in `../analise_graficos/`.*
+*Analysis based on 300 GFE test cases. Figures 1–22 in `analise_graficos/`.*
